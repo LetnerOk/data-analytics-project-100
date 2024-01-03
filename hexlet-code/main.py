@@ -412,7 +412,7 @@ def visualizated_cost(df):
     plt.tight_layout()
     plt.savefig(f'./charts/daily_cost.png')
 
-    conv_cost_week = df_merged_conv_ads.copy()
+    conv_cost_week = df.copy()
     conv_cost_week['date_week'] = pd.to_datetime(conv_cost_week['date_group'])
     conv_cost_week['date_week'] = conv_cost_week['date_week'].dt.to_period('W').dt.start_time.dt.date
     df_conv_cost_week = conv_cost_week.groupby(['date_week', 'utm_campaign']).sum(['visits', 'registrations', 'cost']).reset_index()
@@ -539,7 +539,7 @@ def run_all():
     df_visit_api, df_regist_api = request_api(DATE_BEGIN, DATE_END)
     df_visit_without_bot = visits_cleared(df_visit_api)
     df_visit_unique = unique_visits(df_visit_without_bot)
-    f_agreegated_visit = count_unigue_visits(df_visit_unique)
+    df_agreegated_visit = count_unigue_visits(df_visit_unique)
     df_regist_api_dt = cleared_registrations(df_regist_api)
     df_agreegated_regist = count_registrations(df_regist_api_dt)
     df_merged_conv, df_merged_conv_without_platform = merged_visit_registration_convarsion(df_agreegated_visit, df_agreegated_regist)
