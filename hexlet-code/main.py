@@ -449,43 +449,25 @@ def visualizated_visits_with_active_marketing(df):
     conv_ads_campaign4 = df[df["utm_campaign"] == "virtual_reality_workshop"]
     conv_ads_campaign5 = df[df["utm_campaign"] == "web_dev_workshop_series"]
         
-    fig, ax = plt.subplots(2, 1, figsize=(14, 10))
-    plt.suptitle("Visits during marketing active days", fontsize=16)
+    plt.figure(figsize=(14, 5))
     
-    ax[0].plot(df['date_group'], df['visits'], marker='o', c='b', label='Visits') 
-    ax[0].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[0].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    
-    ax[0].set_xticks(df['date_group'], )
-    ax[0].set_xticklabels(df['date_group'], rotation=45)    
-    ax[0].legend(loc='upper right')
-    ax[0].set_title('Daily visits for the first two months', fontsize=14)
-    ax[0].set_xlabel('Date', fontsize=14)
-    ax[0].set_ylabel('Visits', fontsize=14)
-    ax[0].set_xlim(df['date_group'].min(), '2023-05-15')
-    ax[0].grid()
+    plt.plot(df['date_group'], df['visits'], c='b', label='Visits') 
+    plt.axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
+    plt.axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
+    plt.axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
+    plt.axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
+    plt.axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
 
-    ax[1].plot(df['date_group'], df['visits'], marker='o', c='b', label='Visits')
-    ax[1].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[1].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[1].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
-
-    ax[1].set_xticks(df['date_group'])
-    ax[1].set_xticklabels(df['date_group'], rotation=45)
-    ax[1].legend(loc='upper left')
-    ax[1].set_title('Daily visits for the last three months', fontsize=14)
-    ax[1].set_xlabel('Date', fontsize=14)
-    ax[1].set_ylabel('Visits', fontsize=14)
-    ax[1].set_xlim('2023-05-15', df['date_group'].max())
-    ax[1].set_ylim(0, 1400)
-    ax[1].grid()
     
+    plt.xticks(df['date_group'], rotation=45)  
+    plt.legend(loc='upper right')
+    plt.title('Visits during marketing active days', fontsize=14)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Visits', fontsize=14)
+    plt.grid()
+ 
     plt.tight_layout()
     plt.savefig(f'./charts/visits_with_active_marketing.png')
-
-
-# In[33]:
 
 
 # Визуализация регистраций с цветовым выделением рекламных кампаний
@@ -496,40 +478,26 @@ def visualizated_registrations_with_active_marketing(df):
     conv_ads_campaign4 = df[df["utm_campaign"] == "virtual_reality_workshop"]
     conv_ads_campaign5 = df[df["utm_campaign"] == "web_dev_workshop_series"]
         
-    fig, ax = plt.subplots(2, 1, figsize=(14, 10))
-    plt.suptitle("Registrations during marketing active days", fontsize=16)
+    plt.figure(figsize=(14, 5))
     
-    ax[0].plot(df['date_group'], df['registrations'], marker='o', c='b', label='Visits') 
-    ax[0].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[0].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
+    plt.plot(df['date_group'], df['registrations'], c='b', label='Visits') 
+    plt.axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
+    plt.axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
+    plt.axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
+    plt.axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
+    plt.axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
+
     
-    ax[0].set_xticks(df['date_group'], )
-    ax[0].set_xticklabels(df['date_group'], rotation=45)    
-    ax[0].legend(loc='upper right')
-    ax[0].set_title('Daily registrations for the first two months', fontsize=14)
-    ax[0].set_xlabel('Date', fontsize=14)
-    ax[0].set_ylabel('Registrations', fontsize=14)
-    ax[0].set_xlim(df['date_group'].min(), '2023-05-15')
-    ax[0].grid()
-
-    ax[1].plot(df['date_group'], df['registrations'], marker='o', c='b', label='Visits')
-    ax[1].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[1].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[1].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
-
-    ax[1].set_xticks(df['date_group'])
-    ax[1].set_xticklabels(df['date_group'], rotation=45)
-    ax[1].legend()
-    ax[1].set_title('Daily registrations for the last three months', fontsize=14)
-    ax[1].set_xlabel('Date', fontsize=14)
-    ax[1].set_ylabel('Registrations', fontsize=14)
-    ax[1].set_xlim('2023-05-15', df['date_group'].max())
-    ax[1].set_ylim(0, 300)
-    ax[1].grid()
-        
+    plt.xticks(df['date_group'], rotation=45)  
+    plt.legend(loc='upper right')
+    plt.title('Daily registrations for the first two months', fontsize=14)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Registrations', fontsize=14)
+    plt.grid()
+ 
     plt.tight_layout()
     plt.savefig(f'./charts/registrations_with_active_marketing.png')
+
 
 
 # In[34]:
