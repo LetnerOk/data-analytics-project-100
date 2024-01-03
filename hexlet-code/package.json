@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@hexlet/data-analytics-charts-frontend": "^0.0.7"
+  }
+}
