@@ -503,7 +503,6 @@ def visualizated_registrations_with_active_marketing(df):
     ax[0].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
     ax[0].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
     ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
     ax[0].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
     ax[0].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
     
