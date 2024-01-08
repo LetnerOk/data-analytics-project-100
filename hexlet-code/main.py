@@ -17,25 +17,26 @@ from pathlib import Path
 # In[40]:
 
 
-load_dotenv()  # загружаются переменные из файла
+load_dotenv(find_dotenv()) # загружаются переменные окружения
 
 DATE_BEGIN = os.getenv('DATE_BEGIN')
 DATE_END = os.getenv('DATE_END')
 API_URL = os.getenv('API_URL')
-print(DATE_BEGIN)
+print(f'DATE_BEGIN = {DATE_BEGIN}')
+print(f'DATE_END = {DATE_END}')
 
 
 # In[9]:
 
 
 # Отправляем запрос по API для получения визитов по URL
-def request_api(date_1, date_2):
-    data_visit_api = requests.get(f'{API_URL}/visits?begin={date_1}&end={date_2}') 
+def request_api(date_1, date_2, url):
+    data_visit_api = requests.get(f'{url}/visits?begin={date_1}&end={date_2}') 
     visit_json = data_visit_api.json() #Преобразуем данные в объект JSON
     visit_api = pd.DataFrame(visit_json) #преобразуем JSON в DataFrame
    
     #Отправляем запрос по API для получения регистраций по URL
-    data_regist_api = requests.get(f'{API_URL}/registrations?begin={date_1}&end={date_2}') 
+    data_regist_api = requests.get(f'{url}/registrations?begin={date_1}&end={date_2}') 
     regist_json = data_regist_api.json() #Преобразуем данные в объект JSON
     regist_api = pd.DataFrame(regist_json) #преобразуем JSON в DataFrame
     #df_regist_api.head()
@@ -106,7 +107,6 @@ def count_registrations(df):
     #Преобразуем данные в столбце 'datetime' в объект типа datetime64[ns]
     df['date_group'] = pd.to_datetime(df['datetime'])#, format='%a, %d %b %Y %H:%M:%S GMT')
     #df_regist_api_dt.dtypes
-    df.sort_values(by='date_group', ascending=True)
     #С помощью функции to_datetime() преобразуем datetime в формат даты и времени
     df['date_group'] = df['date_group'].dt.strftime('%Y-%m-%d')
     agreegated_regist = df.groupby(['date_group', 'platform']) \
@@ -349,14 +349,8 @@ def visualizated_conversion_by_platform(df):
 # In[30]:
 
 
-# Визуализация полной конверсии по неделям и месяцам
+# Визуализация полной конверсии по неделям
 def visualizated_full_conversion(df):
-    conv_m = df.copy()
-    conv_m['date_month'] = pd.to_datetime(conv_m['date_week'])
-    conv_m['date_month'] = conv_m['date_month'].dt.to_period('M').dt.start_time.dt.date
-    df_conv_m = conv_m.groupby(['date_month']).sum(['visits', 'registrations']).reset_index()
-    df_conv_m['conversion'] = (df_conv_m['registrations'] / df_conv_m['visits']) * 100
-
     #Create plot chart for weekly overall convertion
     plt.figure(figsize=(14, 5))
     plt.plot(df['date_week'], df['conversion'], marker='o', c='b', label='overall convertion')
@@ -366,7 +360,7 @@ def visualizated_full_conversion(df):
         label = "{:.0f}%".format(y0)
         plt.annotate(label, (x0,y0), textcoords="offset points",  xytext=(0,10), ha='center')
     plt.legend()
-    plt.title('Overall convertion')
+    plt.title('Wekly overall convertion')
     plt.xlabel('Date')
     plt.ylabel('Conversion')
     plt.xticks(df['date_week'], rotation=45)
@@ -376,42 +370,12 @@ def visualizated_full_conversion(df):
     plt.savefig(f'./charts/weekly_overall_conversion.png')
 
 
-    #Create plot chart for monthly overall convertion
-    plt.figure(figsize=(14, 5))
-    plt.plot(df_conv_m['date_month'], df_conv_m['conversion'], marker='o', c='b', label='overall convertion per months')
-    x0 = df_conv_m['date_month']
-    y0 = df_conv_m['conversion']
-    for x0,y0 in zip(x0,y0):
-        label = "{:.0f}%".format(y0)
-        plt.annotate(label, (x0,y0), textcoords="offset points",  xytext=(0,10), ha='center')
-    plt.legend()
-    plt.title('Overall convertion per months')
-    plt.xlabel('Date')
-    plt.ylabel('Conversion')
-    plt.xticks(df_conv_m['date_month'], rotation=45)
-    plt.ylim([15, 22])
-    plt.grid()
-    plt.tight_layout()
-    plt.savefig(f'./charts/monthly_overall_conversion.png')
-
-
 # In[31]:
 
 
 # Визуализация затрат на рекламу по дням и неделям
 def visualizated_cost(df):
     #Create plot chart for weekly overall convertion
-    plt.figure(figsize=(14, 5))
-    plt.plot(df['date_group'], df['cost'], marker='o', c='b', label='cost')
-    plt.legend()
-    plt.title('Daily cost')
-    plt.xlabel('Date')
-    plt.ylabel('Cost')
-    plt.xticks(rotation=45)
-    plt.grid()
-    plt.tight_layout()
-    plt.savefig(f'./charts/daily_cost.png')
-
     conv_cost_week = df.copy()
     conv_cost_week['date_week'] = pd.to_datetime(conv_cost_week['date_group'])
     conv_cost_week['date_week'] = conv_cost_week['date_week'].dt.to_period('W').dt.start_time.dt.date
@@ -442,96 +406,56 @@ def visualizated_cost(df):
 
 
 # Визуализация визитов с цветовым выделением рекламных кампаний
-def visualizated_visits_with_active_marketing(df):
+def visualizated_visits_with_active_marketing(df, df_week):
     conv_ads_campaign1 = df[df["utm_campaign"] == "cybersecurity_special"]
     conv_ads_campaign2 = df[df["utm_campaign"] == "game_dev_crash_course"]
     conv_ads_campaign3 = df[df["utm_campaign"] == "tech_career_fair"]
     conv_ads_campaign4 = df[df["utm_campaign"] == "virtual_reality_workshop"]
     conv_ads_campaign5 = df[df["utm_campaign"] == "web_dev_workshop_series"]
         
-    fig, ax = plt.subplots(2, 1, figsize=(14, 10))
-    plt.suptitle("Visits during marketing active days", fontsize=16)
+    plt.figure(figsize=(14, 5))
+        
+    plt.plot(df_week['date_week'], df_week['visits'], marker='o', c='b', label='Visits') 
+    plt.axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
+    plt.axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
+    plt.axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
     
-    ax[0].plot(df['date_group'], df['visits'], marker='o', c='b', label='Visits') 
-    ax[0].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[0].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[0].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[0].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
+    plt.xticks(df_week['date_week'], rotation=45)
+    plt.legend(loc='upper right')
+    plt.title('Weekly visits during marketing active days', fontsize=14)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Visits', fontsize=14)
+    plt.grid()
 
     
-    ax[0].set_xticks(df['date_group'], )
-    ax[0].set_xticklabels(df['date_group'], rotation=45)    
-    ax[0].legend(loc='upper right')
-    ax[0].set_title('Daily visits for the entire period', fontsize=14)
-    ax[0].set_xlabel('Date', fontsize=14)
-    ax[0].set_ylabel('Visits', fontsize=14)
-    ax[0].grid()
-
-    ax[1].plot(df['date_group'], df['visits'], marker='o', c='b', label='Visits')
-    ax[1].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[1].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[1].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[1].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[1].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
-
-    ax[1].set_xticks(df['date_group'])
-    ax[1].set_xticklabels(df['date_group'], rotation=45)
-    ax[1].legend(loc='upper right')
-    ax[1].set_title('Daily visits till 2023-05-08', fontsize=14)
-    ax[1].set_xlabel('Date', fontsize=14)
-    ax[1].set_ylabel('Visits', fontsize=14)
-    ax[1].set_xlim(df['date_group'].min(), '2023-05-08')
-    ax[1].grid()
- 
     plt.tight_layout()
-    plt.savefig(f'./charts/visits_with_active_marketing.png')
+    plt.savefig(f'./charts/Weekly_visits_with_active_marketing.png')
 
 
 # Визуализация регистраций с цветовым выделением рекламных кампаний
-def visualizated_registrations_with_active_marketing(df):
+def visualizated_registrations_with_active_marketing(df, df_week):
     conv_ads_campaign1 = df[df["utm_campaign"] == "cybersecurity_special"]
     conv_ads_campaign2 = df[df["utm_campaign"] == "game_dev_crash_course"]
     conv_ads_campaign3 = df[df["utm_campaign"] == "tech_career_fair"]
     conv_ads_campaign4 = df[df["utm_campaign"] == "virtual_reality_workshop"]
     conv_ads_campaign5 = df[df["utm_campaign"] == "web_dev_workshop_series"]
         
-    fig, ax = plt.subplots(2, 1, figsize=(14, 10))
-    plt.suptitle("Registrations during marketing active days", fontsize=16)
+    plt.figure(figsize=(14, 5))
+    plt.title("Weekly Registrations during marketing active days", fontsize=14)
     
-    ax[0].plot(df['date_group'], df['registrations'], marker='o', c='b', label='Visits') 
-    ax[0].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[0].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[0].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[0].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[0].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
+    plt.plot(df_week['date_week'], df_week['registrations'], marker='o', c='b', label='Visits') 
+    plt.axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
+    plt.axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
+    plt.axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
     
-    ax[0].set_xticks(df['date_group'], )
-    ax[0].set_xticklabels(df['date_group'], rotation=45)    
-    ax[0].legend(loc='upper right')
-    ax[0].set_title('Daily registrations for the entire period', fontsize=14)
-    ax[0].set_xlabel('Date', fontsize=14)
-    ax[0].set_ylabel('Registrations', fontsize=14)
-    ax[0].grid()
-
-    ax[1].plot(df['date_group'], df['registrations'], marker='o', c='b', label='Visits')
-    ax[1].axvspan(conv_ads_campaign4['date_group'].min(), conv_ads_campaign4['date_group'].max(), facecolor='yellow', alpha=0.5, label='virtual_reality_workshop')
-    ax[1].axvspan(conv_ads_campaign2['date_group'].min(), conv_ads_campaign2['date_group'].max(), facecolor='lightgreen', alpha=0.5, label='game_dev_crash_course')
-    ax[1].axvspan(conv_ads_campaign5['date_group'].min(), conv_ads_campaign5['date_group'].max(), facecolor='cyan', alpha=0.5, label='web_dev_workshop_series')
-    ax[1].axvspan(conv_ads_campaign3['date_group'].min(), conv_ads_campaign3['date_group'].max(), facecolor='pink', alpha=0.5, label='tech_career_fair')
-    ax[1].axvspan(conv_ads_campaign1['date_group'].min(), conv_ads_campaign1['date_group'].max(), facecolor='lightblue', alpha=0.5, label='cybersecurity_special')
-
-    ax[1].set_xticks(df['date_group'])
-    ax[1].set_xticklabels(df['date_group'], rotation=45)
-    ax[1].legend()
-    ax[1].set_title('Daily registrations till 2023-05-08', fontsize=14)
-    ax[1].set_xlabel('Date', fontsize=14)
-    ax[1].set_ylabel('Registrations', fontsize=14)
-    ax[1].set_xlim(df['date_group'].min(), '2023-05-08')
-    ax[1].grid()
- 
+    plt.xticks(df_week['date_week'], rotation=45)  
+    plt.legend(loc='upper right')
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Registrations', fontsize=14)
+    plt.grid()
+       
     plt.tight_layout()
-    plt.savefig(f'./charts/registrations_with_active_marketing.png')
+    plt.savefig(f'./charts/Weekly_registrations_with_active_marketing.png')
 
 
 
@@ -539,7 +463,7 @@ def visualizated_registrations_with_active_marketing(df):
 
 
 def run_all():
-    df_visit_api, df_regist_api = request_api(DATE_BEGIN, DATE_END)
+    df_visit_api, df_regist_api = request_api(DATE_BEGIN, DATE_END, API_URL)
     df_visit_without_bot = visits_cleared(df_visit_api)
     df_visit_unique = unique_visits(df_visit_without_bot)
     df_agreegated_visit = count_unigue_visits(df_visit_unique)
@@ -557,8 +481,8 @@ def run_all():
     visualizated_conversion_by_platform(df_conv_week_platform)
     visualizated_full_conversion(df_conv_week) 
     visualizated_cost(df_merged_conv_ads)
-    visualizated_visits_with_active_marketing(df_merged_conv_ads)
-    visualizated_registrations_with_active_marketing(df_merged_conv_ads)
+    visualizated_visits_with_active_marketing(df_merged_conv_ads, df_conv_week)
+    visualizated_registrations_with_active_marketing(df_merged_conv_ads,  df_conv_week)
 
 
 # In[35]:
